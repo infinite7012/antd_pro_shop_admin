@@ -14,7 +14,11 @@ const UserModel = {
     },
 
     *fetchCurrent(_, { call, put }) {
-      const response = yield call(queryCurrent);
+      let response = JSON.parse(localStorage.getItem('userInfo'))
+      if (!response || !response.id) {
+        response = yield call(queryCurrent);
+        localStorage.setItem('userInfo', JSON.stringify(response))
+      }
       yield put({
         type: 'saveCurrentUser',
         payload: response,
@@ -24,22 +28,6 @@ const UserModel = {
   reducers: {
     saveCurrentUser(state, action) {
       return { ...state, currentUser: action.payload || {} };
-    },
-
-    changeNotifyCount(
-      state = {
-        currentUser: {},
-      },
-      action,
-    ) {
-      return {
-        ...state,
-        currentUser: {
-          ...state.currentUser,
-          notifyCount: action.payload.totalCount,
-          unreadCount: action.payload.unreadCount,
-        },
-      };
     },
   },
 };

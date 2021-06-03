@@ -4,13 +4,13 @@ export default [
     component: '../layouts/BlankLayout',
     routes: [
       {
-        path: '/user',
-        component: '../layouts/UserLayout',
+        path: '/login',
+        component: '../layouts/LoginLayout',
         routes: [
           {
             name: 'login',
-            path: '/user/login',
-            component: './User/login',
+            path: '/login',
+            component: './login',
           },
         ],
       },
@@ -21,39 +21,28 @@ export default [
           {
             path: '/',
             component: '../layouts/BasicLayout',
-            authority: ['admin', 'user'],
             routes: [
               {
                 path: '/',
-                redirect: '/welcome',
+                redirect: '/dashboard',
               },
               {
-                path: '/welcome',
-                name: 'welcome',
-                icon: 'smile',
-                component: './Welcome',
+                name: 'dashboard',
+                path: '/dashboard',
+                icon: 'PieChartOutlined',
+                component: '@/pages/DashBoard',
               },
               {
-                path: '/admin',
-                name: 'admin',
-                icon: 'crown',
-                component: './Admin',
-                authority: ['admin'],
-                routes: [
-                  {
-                    path: '/admin/sub-page',
-                    name: 'sub-page',
-                    icon: 'smile',
-                    component: './Welcome',
-                    authority: ['admin'],
-                  },
-                ],
+                name: 'user',
+                path: '/user',
+                icon: 'UserOutlined',
+                component: '@/pages/User',
               },
               {
-                name: 'list.table-list',
-                icon: 'table',
-                path: '/list',
-                component: './TableList',
+                name: 'goods',
+                path: '/goods',
+                icon: 'ShoppingOutlined',
+                component: '@/pages/Goods',
               },
               {
                 component: './404',

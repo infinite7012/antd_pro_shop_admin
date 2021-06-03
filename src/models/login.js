@@ -1,68 +1,39 @@
-import { stringify } from 'querystring';
 import { history } from 'umi';
-import { fakeAccountLogin } from '@/services/login';
-import { setAuthority } from '@/utils/authority';
-import { getPageQuery } from '@/utils/utils';
+import { fakeAccountLogin, loginOut } from '@/services/login';
 import { message } from 'antd';
 const Model = {
   namespace: 'login',
   state: {
-    status: undefined,
   },
   effects: {
     *login({ payload }, { call, put }) {
       const response = yield call(fakeAccountLogin, payload);
-      yield put({
-        type: 'changeLoginStatus',
-        payload: response,
-      }); // Login successfully
-
-      if (response.status === 'ok') {
-        const urlParams = new URL(window.location.href);
-        const params = getPageQuery();
-        message.success('🎉 🎉 🎉  登录成功！');
-        let { redirect } = params;
-
-        if (redirect) {
-          const redirectUrlParams = new URL(redirect);
-
-          if (redirectUrlParams.origin === urlParams.origin) {
-            redirect = redirect.substr(urlParams.origin.length);
-
-            if (window.routerBase !== '/') {
-              redirect = redirect.replace(window.routerBase, '/');
-            }
-
-            if (redirect.match(/^\/.*#/)) {
-              redirect = redirect.substr(redirect.indexOf('#') + 1);
-            }
-          } else {
-            window.location.href = '/';
-            return;
-          }
-        }
-
-        history.replace(redirect || '/');
+      if (response.status === undefined) {
+        message.success('登录成功')
+        yield put({
+          type: 'changeLoginStatus',
+          payload: response,
+        }); // Login successfully
+        history.replace('/')
       }
     },
 
-    logout() {
-      const { redirect } = getPageQuery(); // Note: There may be security issues, please note
-
-      if (window.location.pathname !== '/user/login' && !redirect) {
-        history.replace({
-          pathname: '/user/login',
-          search: stringify({
-            redirect: window.location.href,
-          }),
-        });
+    *logout(_, { call, put }) {
+      const loading = message.loading('退出中...')
+      const response = yield call(loginOut);
+      if (response.status === undefined) {
+        message.success('退出成功')
+        localStorage.removeItem('userInfo')
+        localStorage.removeItem('access_token')
+        history.replace('/login')
       }
+      loading()
     },
   },
   reducers: {
     changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
-      return { ...state, status: payload.status, type: payload.type };
+      localStorage.setItem('access_token', payload.access_token)
+      return { ...state };
     },
   },
 };
